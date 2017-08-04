@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
     keyArrowsPress();
 });
 
+/*
+* Variables globales
+*/
 var XTotal = 9; // 10 unidades
 var YTotal = 19; // 10 unidades
 var Tablero = [];
@@ -14,6 +17,15 @@ var PieceType;
 var PieceColor;
 var MovePieceInterval;
 
+function init() {
+  Tablero = createBoard(10, 20);
+  console.log(Tablero);
+  putPieceInBoard();
+}
+
+/*
+Crear Tablero
+ */
 function createBoard(width, height){
     var result = [];
     for (var i = 0 ; i < width; i++) {
@@ -26,12 +38,9 @@ function createBoard(width, height){
     return result;
 }
 
-function init() {
-  Tablero = createBoard(10, 20);
-  console.log(Tablero);
-  putPieceInBoard();
-}
-
+/*
+Teclas de posición
+ */
 function keyArrowsPress() {
   document.addEventListener("keydown", function(event) {
     var key = event.which;
@@ -58,6 +67,9 @@ function keyArrowsPress() {
   });
 }
 
+/*
+Funciones automaticas
+ */
 function movePieceAutomatic() {
   MovePieceInterval =  setInterval(function(){
     movePiece([0,-1], PieceCubePos);
@@ -67,11 +79,6 @@ function movePieceAutomatic() {
 function putPieceInBoard() {
 
   var newPiece = pieceGenerator();
-
-  PieceCubePos[0] = "3-10";
-  PieceCubePos[1] = "4-10";
-  PieceCubePos[2] = "5-10";
-  PieceCubePos[3] = "6-10";
 
   var cube0 = document.getElementById("cube-" + PieceCubePos[0]);
   var cube1 = document.getElementById("cube-" + PieceCubePos[1]);
@@ -92,13 +99,38 @@ function putPieceInBoard() {
 
 }
 
+function isStopPiece(posNewArray) {
+  /*
+  Solo si el movimiento es valido
+   */
+  if( !isMoveValid(posNewArray) && isCubeInBoard(posNewArray)){
+    var cube = document.getElementById("cube-" + posNewArray["x"] + "-" + posNewArray["y"]);
+    if (hasClass(cube, "cube-stop")) {
+      return true;
+    }
+    return false;
+  }
+  return false;
+
+}
+
+function isCubeInBoard(posNewArray) {
+  if (posNewArray["x"] > -1 && posNewArray["x"] <= XTotal
+  && posNewArray["y"] > -1 && posNewArray["y"] <= YTotal) {
+    return true;
+  }
+  return false
+}
+
 function isMoveValid(posNewArray) {
 
   retValue = false;
 
-  if (posNewArray["x"] > -1 && posNewArray["x"] <= XTotal
-  && posNewArray["y"] > -1 && posNewArray["y"] <= YTotal) {
-    retValue = true;
+  if ( isCubeInBoard(posNewArray) ) {
+    var cube = document.getElementById("cube-" + posNewArray["x"] + "-" + posNewArray["y"]);
+    if(!hasClass(cube, "cube-stop") ) {
+      retValue = true;
+    }
   }
 
   return retValue;
@@ -147,8 +179,10 @@ function movePiece(moveArray, pieceCubePos) {
     posNewArray[i]["x"] = posOldArray[i]["x"] + xMove;
     posNewArray[i]["y"] = posOldArray[i]["y"] + yMove;
 
-    if(posNewArray[i]["y"] == 0) {
+    if(posNewArray[i]["y"] < 0 || isStopPiece(posNewArray[i])) {
       noMoreMoveY = true;
+      moveValid = false;
+      break;
     }
 console.log(posOldArray[i]);
 console.log(posNewArray[i]);
@@ -165,21 +199,31 @@ console.log(posNewArray[i]);
   if (moveValid) {
     for (var i = 0; i < pieceCubePos.length; i++) {
       PieceCubePos[i] = posNewArray[i]["x"] + "-" + posNewArray[i]["y"];
-      remplaceCube(posOldArray[i], posNewArray[i], "blue");
+      remplaceCube(posOldArray[i], posNewArray[i], PieceColor);
     }
   } else {
     console.log("entra");
       console.log(yMove);
         console.log(noMoreMoveY);
-    if(yMove == 0 && noMoreMoveY) {
+    if(noMoreMoveY) {
       console.log("entra2222");
+      stopPiece(PieceCubePos);
       clearInterval(MovePieceInterval);
-    } else {
-
+      console.log("No se puede realizar el movimiento");
+      putPieceInBoard();
     }
-    console.log("No se puede realizar el movimiento");
   }
 
+}
+
+function stopPiece(pieceCubePos) {
+  for (var i = 0; i < pieceCubePos.length; i++) {
+    var splitPos = pieceCubePos[i].split("-");
+    var cube = document.getElementById("cube-" + splitPos[0] + "-" + splitPos[1]);
+    // console.log(pieceCubePos[i]);
+    // console.log(cube.getAttribute("class"));
+    cube.setAttribute('class', cube.getAttribute("class") + " cube-stop");
+  }
 }
 
 function turnPiece(type, pieceCubePos) {
@@ -237,18 +281,32 @@ function turnPiece(type, pieceCubePos) {
           moveValid = false;
           break;
         }
-        // remplaceCube(posOldArray[i], posNewArray[i], "blue");
+        // remplaceCube(posOldArray[i], posNewArray[i], PieceColor);
       }
 
       break;
+
     default:
+    console.log("Llega con type = " + type);
+      for (var i = 0; i < PieceCubePos.length; i++) {
+        posDif[i]["x"] = (posOldArray[i]["x"]);
+        posDif[i]["y"] = (posOldArray[i]["y"]);
+      }
+      for (var i = 0; i < posDif.length; i++) {
+        posNewArray[i]["x"] = posDif[i]["x"];
+        posNewArray[i]["y"] = posDif[i]["y"];
+        if(!isMoveValid(posNewArray[i])) {
+          moveValid = false;
+          break;
+        }
+      }
 
   }
 
   if (moveValid) {
     for (var i = 0; i < pieceCubePos.length; i++) {
       PieceCubePos[i] = posNewArray[i]["x"] + "-" + posNewArray[i]["y"];
-      remplaceCube(posOldArray[i], posNewArray[i], "blue");
+      remplaceCube(posOldArray[i], posNewArray[i], PieceColor);
     }
   } else {
     console.log("No se puede realizar el movimiento");
@@ -260,7 +318,7 @@ function turnPiece(type, pieceCubePos) {
 
 function pieceGenerator() {
 
-  var type = 0;
+  var type = Math.round( (Math.random() * 1) );
   PieceType = type;
   var retVal = {};
 
@@ -270,12 +328,39 @@ function pieceGenerator() {
       retVal.color = "blue";
       retVal.xUnits = 4;
       retVal.yUnits = 1;
+
+      PieceCubePos[0] = "3-19";
+      PieceCubePos[1] = "4-19";
+      PieceCubePos[2] = "5-19";
+      PieceCubePos[3] = "6-19";
+
+      break;
+
+    case 1:
+
+      retVal.color = "yellow";
+      retVal.xUnits = 2;
+      retVal.yUnits = 2;
+
+      PieceCubePos[0] = "4-18";
+      PieceCubePos[1] = "4-19";
+      PieceCubePos[2] = "5-18";
+      PieceCubePos[3] = "5-19";
+
       break;
 
     default:
       break;
   }
 
+  PieceType = type;
+  PieceColor = retVal.color;
+
   return retVal;
 
+}
+
+
+function hasClass(element, cls) {
+    return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 }
