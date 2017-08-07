@@ -14,8 +14,17 @@
 .bg-blue {
   background: blue;
 }
+.bg-blue2 {
+  background: blue;
+}
 .bg-yellow {
   background: yellow;
+}
+.bg-green {
+  background: green;
+}
+.bg-purple {
+  background: purple;
 }
 
 .tetris-table{

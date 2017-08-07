@@ -1,9 +1,57 @@
 document.addEventListener("DOMContentLoaded", function(event) {
-    console.log( "ready!" );
-    console.log( pieceGenerator() );
-    init();
-    keyArrowsPress();
+    // console.log( "ready!" );
+    // console.log( pieceGenerator() );
+    // init();
+    // keyArrowsPress();
+    var tablero = new Board(10,20);
+    console.log(tablero.board);
+
+    newPiece();
+
+    // if( pieza.move({"x": 0, "y": -1}) ) {
+    //   pieza = new Piece(pieza.type, pieza.pos);
+    //   if( pieza.move({"x": 0, "y": -1}) ) {
+    //     // pieza = new Piece(pieza.type, pieza.pos);
+    //   }
+    // }
 });
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function newPiece() {
+  // var pieza = new Piece(getRandomInt(0, 2));
+    var pieza = new Piece(0);
+  // var piezaPos = pieza.pos;
+  // console.log(piezaPos);
+  // console.log(pieza.type);
+  var intervalTimes = 0;
+  var MovePieceInterval =  setInterval(function(){
+    if( pieza.move({"x": 0, "y": -1}) ) {
+      // console.log();
+
+      pieza = reloadPiece(pieza);
+      intervalTimes++;
+    } else {
+      pieza = null;
+      intervalTimes = 0;
+      clearInterval(MovePieceInterval);
+      newPiece();
+    }
+
+      if ( intervalTimes == 1) {
+        console.log("intervalTimes = 1");
+        console.log(pieza.pos);
+        keyArrowsPress(pieza);
+      }
+  }, 1000);
+}
+
+function reloadPiece(pieza) {
+
+  return new Piece(pieza.type, pieza.pos)
+}
 
 /*
 * Variables globales
@@ -15,7 +63,7 @@ var CubeClassInit = "tetris-cube";
 var PieceCubePos = [];
 var PieceType;
 var PieceColor;
-var MovePieceInterval;
+// var MovePieceInterval;
 
 function init() {
   Tablero = createBoard(10, 20);
@@ -41,27 +89,36 @@ function createBoard(width, height){
 /*
 Teclas de posición
  */
-function keyArrowsPress() {
+function keyArrowsPress(pieza) {
   document.addEventListener("keydown", function(event) {
     var key = event.which;
     switch(key) {
       case 37:
           // Key left.
           console.log("izquierda!!!");
-          movePiece([-1,0], PieceCubePos);
+          console.log(pieza.pos);
+          pieza.move({"x": -1, "y": 0});
+          // reloadPiece(pieza);
+          // movePiece([-1,0], PieceCubePos);
           break;
       case 38:
           // Key up.
-          turnPiece(PieceType, PieceCubePos);
+          // turnPiece(PieceType, PieceCubePos);
+          console.log("arriba!!!");
+          pieza.turnPiece();
           break;
       case 39:
           // Key right.
           console.log("derecha!!!");
-          movePiece([1,0], PieceCubePos);
+          pieza.move({"x": 1, "y": 0});
+          // reloadPiece(pieza);
+          // movePiece([1,0], PieceCubePos);
           break;
       case 40:
           // Key down.
-          movePiece([0,-1], PieceCubePos);
+          pieza.move({"x": 0, "y": -1});
+          // reloadPiece(pieza);
+          // movePiece([0,-1], PieceCubePos);
           break;
     }
   });
@@ -318,7 +375,7 @@ function turnPiece(type, pieceCubePos) {
 
 function pieceGenerator() {
 
-  var type = Math.round( (Math.random() * 1) );
+  var type = Math.round( (Math.random() * 1) + 1);
   PieceType = type;
   var retVal = {};
 
