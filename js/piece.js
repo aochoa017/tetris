@@ -571,8 +571,11 @@ class Piece {
 
     if (moveValid) {
       for (var i = 0; i < this.pos.length; i++) {
+          // console.log(posOld[i]);
+          // console.log(posNew[i]);
         // PieceCubePos[i] = posNew[i]["x"] + "-" + posNew[i]["y"];
         this.remplaceCube(posOld, posNew);
+        this.savePos(posNew);
       }
     } else {
       console.log("No se puede realizar el movimiento");
@@ -586,7 +589,7 @@ class Piece {
     for (var i = 0; i < this.cube.length; i++) {
       // this.pos[i].x = posNew[i]["x"];
       // this.pos[i].y = posNew[i]["y"];
-      this.cube[i] = posNew[i]["x"] + "-" + posNew[i]["y"];
+      // this.cube[i] = posNew[i]["x"] + "-" + posNew[i]["y"];
 
       if( !this.isCubeInArrayCubes(posOld[i], posNew) ) {
         var cubeOld = document.getElementById("cube-" + posOld[i]["x"] + "-" + posOld[i]["y"]);
