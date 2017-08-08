@@ -20,21 +20,24 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+var pieza = [];
+var nPieza = -1;
 function newPiece() {
-  // var pieza = new Piece(getRandomInt(0, 2));
-    var pieza = new Piece(0);
+  nPieza++;
+  pieza[nPieza] = new Piece(getRandomInt(0, 2));
+    // var pieza = new Piece(0);
   // var piezaPos = pieza.pos;
   // console.log(piezaPos);
   // console.log(pieza.type);
   var intervalTimes = 0;
   var MovePieceInterval =  setInterval(function(){
-    if( pieza.move({"x": 0, "y": -1}) ) {
+    if( pieza[nPieza].move({"x": 0, "y": -1}) ) {
       // console.log();
 
-      pieza = reloadPiece(pieza);
+      pieza[nPieza] = reloadPiece(pieza[nPieza]);
       intervalTimes++;
     } else {
-      pieza = null;
+      // pieza = null;
       intervalTimes = 0;
       clearInterval(MovePieceInterval);
       newPiece();
@@ -42,8 +45,8 @@ function newPiece() {
 
       if ( intervalTimes == 1) {
         console.log("intervalTimes = 1");
-        console.log(pieza.pos);
-        keyArrowsPress(pieza);
+        console.log(pieza.type);
+        keyArrowsPress(pieza[nPieza]);
       }
   }, 1000);
 }
