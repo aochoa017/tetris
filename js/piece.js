@@ -8,12 +8,9 @@ class Piece {
     this.setColor(type);
     if(pos === undefined){
       this.generator(this.type);
-      console.log("pos undefined");
       this.putPieceInBoard();
-      console.log(this.pos[0].y);
     } else {
       this.pos = pos;
-      console.log(this.pos[0].y);
       this.setPieceInBoard();
     }
 
@@ -50,7 +47,7 @@ class Piece {
     }
   }
 
-  generator(typeValue) {console.log("generator");
+  generator(typeValue) {
 
     switch (typeValue) {
       case 0:
@@ -241,8 +238,11 @@ class Piece {
   }
 
   stopPiece() {
+    console.log("STOP");
+    console.log(this.pos);
     for (var i = 0; i < this.pos.length; i++) {
       var cube = document.getElementById("cube-" + this.pos[i].x + "-" + this.pos[i].y);
+
       if(!this.hasClass(cube, "cube-stop") ) {
         cube.setAttribute('class', cube.getAttribute("class") + " cube-stop");
       }
@@ -251,11 +251,10 @@ class Piece {
 
   move(dirValue) {
 
-    console.log(this.pos);
-
     var moveValid = true;
     var notValidButContinue = false;
     var noMoreMoveY = false;
+    var cube = [];
     var posNew = [];
     var posOld = [];
     var reverseFor = false;
@@ -273,21 +272,31 @@ class Piece {
       posOld[i] = [];
       posOld[i]["x"] = this.pos[i].x;
       posOld[i]["y"] = this.pos[i].y;
+    }
+
+    for (var k = 0; k < this.pos.length; k++) {
+      if(!reverseFor) {
+        var i = k;
+      } else {
+        var i = (this.pos.length - 1) - k;
+      }
 
       posNew[i] = [];
       posNew[i]["x"] = posOld[i]["x"] + dirValue.x;
       posNew[i]["y"] = posOld[i]["y"] + dirValue.y;
 
       if( this.isCubeInBoard(posNew[i]) ) {
-        var cube = document.getElementById("cube-" + posNew[i]["x"] + "-" + posNew[i]["y"]);
-        console.log(posNew);
-        if(!this.hasClass(cube, "cube-stop") ) {
+        cube[i] = document.getElementById("cube-" + posNew[i]["x"] + "-" + posNew[i]["y"]);
+
+        if(!this.hasClass(cube[i], "cube-stop") ) {
           moveValid = true;
         } else {
           moveValid = false;
           break;
         }
+
       } else {
+
         moveValid = false;
         if(posNew[i]["y"] < 0) {
           noMoreMoveY = true;
@@ -301,16 +310,18 @@ class Piece {
     }
 
     if (moveValid) {
-      this.savePos(posNew);
+      var retVal = this.savePos(posNew);
       this.remplaceCube(posOld, posNew);
-      return true;
+      // return true;
+      return retVal;
 
     } else {
-      this.isCompleteLine(posOld);
+      console.log(posOld);
       console.log("NOT moveValid");
       if(noMoreMoveY) {
-        console.log("pero llega aqui");
+        console.log("noMoreMoveY");
         this.stopPiece();
+        this.isCompleteLine(posOld);
         return false;
       } else if (!notValidButContinue) {
         this.savePos(posOld);
@@ -318,8 +329,9 @@ class Piece {
         this.stopPiece();
         return false;
       } else{
-        this.savePos(posOld);
-        return true;
+        // this.savePos(posOld);
+        this.isCompleteLine(posOld);
+        return false;
       }
     }
 
@@ -553,7 +565,6 @@ class Piece {
         break;
 
       default:
-      console.log("Llega con type = " + this.type);
         for (var i = 0; i < this.pos.length; i++) {
           posDif[i]["x"] = (posOld[i]["x"]);
           posDif[i]["y"] = (posOld[i]["y"]);
@@ -571,9 +582,6 @@ class Piece {
 
     if (moveValid) {
       for (var i = 0; i < this.pos.length; i++) {
-          // console.log(posOld[i]);
-          // console.log(posNew[i]);
-        // PieceCubePos[i] = posNew[i]["x"] + "-" + posNew[i]["y"];
         this.remplaceCube(posOld, posNew);
         this.savePos(posNew);
       }
@@ -587,19 +595,14 @@ class Piece {
   remplaceCube(posOld, posNew) {
 
     for (var i = 0; i < this.cube.length; i++) {
-      // this.pos[i].x = posNew[i]["x"];
-      // this.pos[i].y = posNew[i]["y"];
-      // this.cube[i] = posNew[i]["x"] + "-" + posNew[i]["y"];
 
       if( !this.isCubeInArrayCubes(posOld[i], posNew) ) {
         var cubeOld = document.getElementById("cube-" + posOld[i]["x"] + "-" + posOld[i]["y"]);
         cubeOld.setAttribute('class', this.cubeClassInit);
       }
       if( !this.isCubeInArrayCubes(posNew[i], posOld) ) {
-// console.log(posOld);
-// console.log(posNew);
         var cubeNew = document.getElementById("cube-" + posNew[i]["x"] + "-" + posNew[i]["y"]);
-        cubeNew.setAttribute('class', this.cubeClassInit + " bg-" + this.color);
+        cubeNew.setAttribute('class', this.cubeClassInit + " mv-piece" + " bg-" + this.color);
       }
     }
 
@@ -615,11 +618,14 @@ class Piece {
   }
 
   savePos(posValue) {
-    console.log(posValue);
+    console.log("savePos");
+    // console.log(posValue);
     for (var i = 0; i < posValue.length; i++) {
       this.pos[i].x = posValue[i]["x"];
       this.pos[i].y = posValue[i]["y"];
     }
+    // console.log(this.pos);
+    return this.pos;
   }
 
   isCompleteLine(posAct) {
@@ -632,20 +638,58 @@ class Piece {
         yCoord.push(posAct[i].y);
       }
     }
-
-    for (var i = 0; i < 10; i++) {
-      cube[i] = document.getElementById("cube-" + i + "-" + yCoord[i]);
-      if ( !this.hasClass(cube[i], "cube-stop") ) {
-        return false;
+    console.log(posAct);
+    console.log(yCoord);
+    // if( yCoord.length != 10 ) {
+    //     return false;
+    // }
+    var totalValue = 0;
+    for (var j = 0; j < yCoord.length; j++) {
+      cube[j] = [];
+      for (var i = 0; i < 10; i++) {
+        cube[j][i] = document.getElementById("cube-" + i + "-" + yCoord[j]);
+        // if() {
+        //   console.log(i);
+        //   console.log(i);
+        // }
+        if ( !this.hasClass(cube[j][i], "cube-stop") ) {
+          console.log("setAttribute false");
+            console.log(i);
+            console.log(yCoord[j]);
+          // cube[j] = [];
+          break;
+          // return false;
+        }
+        totalValue++;
       }
     }
-
-    for (var i = 0; i < cube.length; i++) {
-      cube[i].setAttribute('class', this.cubeClassInit);
+    console.log("paaaassaaaa");
+    console.log(cube);
+    console.log(cube.length);
+    for (var j = 0; j < cube.length; j++) {
+      if (cube[j].length != 10) {
+        continue;
+      }
+      for (var i = 0; i < cube[j].length; i++) {
+        console.log("setAttribute('class', this.cubeClassInit)");
+        cube[j][i].setAttribute('class', this.cubeClassInit);
+      }
     }
 
     return true
 
+  }
+
+
+
+  moveLeft() {
+    return this.move({"x": -1, "y": 0});
+  }
+  moveRight() {
+    return this.move({"x": 1, "y": 0});
+  }
+  moveDown() {
+    return this.move({"x": 0, "y": -1});
   }
 
 }
