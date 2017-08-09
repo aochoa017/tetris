@@ -602,7 +602,7 @@ class Piece {
       }
       if( !this.isCubeInArrayCubes(posNew[i], posOld) ) {
         var cubeNew = document.getElementById("cube-" + posNew[i]["x"] + "-" + posNew[i]["y"]);
-        cubeNew.setAttribute('class', this.cubeClassInit + " mv-piece" + " bg-" + this.color);
+        cubeNew.setAttribute('class', this.cubeClassInit + " bg-" + this.color);
       }
     }
 
@@ -674,13 +674,41 @@ class Piece {
         console.log("setAttribute('class', this.cubeClassInit)");
         cube[j][i].setAttribute('class', this.cubeClassInit);
       }
+      this.downAllPiece(yCoord[j]);
     }
 
     return true
 
   }
 
+  downAllPiece(yCoordMin) {
 
+    for (var j = yCoordMin; j < 20; j++) {
+
+      for (var i = 0; i < 10; i++) {
+
+        var cube = document.getElementById("cube-" + i + "-" + j);
+
+        if ( this.hasClass(cube, "cube-stop") ) {
+          this.downCube(cube, [i, j]);
+        }
+
+      }
+
+    }
+
+  }
+
+  downCube(cube, posValue) {
+    for (var k = 0; k < posValue[1]; k++) {
+      var j = (posValue[1] - 1) - k;
+      var nextCube = document.getElementById("cube-" + posValue[0] + "-" + k);
+      if ( this.hasClass(cube, "cube-stop") ) {
+        var posNew = document.getElementById("cube-" + posValue[0] + "-" + (k + 1));
+        this.remplaceCube(cube, posNew);
+      }
+    }
+  }
 
   moveLeft() {
     return this.move({"x": -1, "y": 0});
